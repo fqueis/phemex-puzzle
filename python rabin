@@ -1,0 +1,28 @@
+from math import sqrt
+
+# encryption function
+# plaintext is a 224-bit number
+def encryption(plaintext, n):
+    # c = m^2 mod n
+    plaintext = padding(plaintext)
+    return plaintext ** 2 % n
+
+
+# padding 16 bits to the end of a number
+def padding(plaintext):
+    binary_str = bin(plaintext)     # convert to a bit string
+    output = binary_str + binary_str[-16:]      # pad the last 16 bits to the end
+    return int(output, 2)       # convert back to integer
+
+n = int('0x02d8e20b367d171d531d7d476628b0dde44fa9fda29e455a8e7b2d1d30c98898fa', 16)
+p = 957496696762772407663
+print(n)
+btc = encryption(35159, n)
+eth = encryption(45256, n)
+xrp = encryption(102334, n)
+
+print('{} {}'.format(btc, sqrt(btc) % p))
+print('{} {}'.format(eth, sqrt(eth) % p))
+print('{} {}'.format(xrp, sqrt(xrp) % p))
+
+print(int(sqrt(xrp) % p*sqrt(eth) % p*sqrt(btc) % p))
