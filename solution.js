@@ -6,7 +6,7 @@ const utils     = require('./utils')
 const g         = require('generatorics')
 
 async function start() {
-    let firstPrime = await utils.fistPrimeWithLength(21, constants.digitsOfE)
+    let prime = await utils.fistPrimeWithLength(21, constants.digitsOfE)
 
     let decrypted = {
         base56: {
@@ -81,15 +81,26 @@ async function start() {
 
     for (const permute of g.baseN([btc, xrp, eth])) {
         let number = bigInt(permute.join('')), bignum = pheme.multiply(number)
-        
-        console.log(`${bignum} ${firstPrime} ${String(bignum).length}`)
-        //console.log(`${utils.valueToHex(firstPrime)}${utils.valueToHex(bignum)}`)
-        //utils.checkHexAgainstAddress(`${utils.valueToHex(firstPrime)}${utils.valueToHex(bignum)}`, true)
 
-        //utils.checkValueAgainstAddress(firstPrime.multiply(bignum))
-        //utils.checkValueAgainstAddress(bigInt(String(firstPrime).concat(bignum.toString())))
+        if (String(bignum).length == 27)
+            checkPossibilities(bignum)
+    }
 
-        //utils.checkHexAgainstAddress(`${utils.valueToHex(bignum)}${utils.valueToHex(firstPrime)}`)
+    function checkPossibilities(bignum) {
+        const possibilites = {
+            inVal: [ bigInt(`${bignum}${prime}`), bigInt(`${prime}${bignum}`), prime.add(bignum), prime.multiply(bignum) ],
+            inHex: [ `${utils.valueToHex(prime)}${utils.valueToHex(bignum)}`, `${utils.valueToHex(bignum)}${utils.valueToHex(prime)}`]
+        }
+
+        possibilites.inVal.forEach(val => { 
+            utils.checkValueAgainstAddress(val)
+            utils.checkValueAgainstAddress(val, true)
+        });
+
+        possibilites.inHex.forEach(hex => {
+            utils.checkHexAgainstAddress(hex)
+            utils.checkHexAgainstAddress(hex, true)
+        })
     }
 }
 
