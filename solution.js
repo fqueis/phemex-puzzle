@@ -83,6 +83,7 @@ async function start() {
             xrp: BigInt(302422),
             eth: bigInt(132616),
             pheme: bigInt(2240374437),
+            pheme_mex: bigInt(2240374437).add(201330),
             phemex: bigInt(224037443755)
         },
         converted: {
@@ -90,36 +91,20 @@ async function start() {
             xrp: utils.stringToBase58('XRP'),
             eth: utils.stringToBase58('ETH'),
             pheme: utils.stringToBase58('Pheme'),
+            pheme_mex: utils.stringToBase58('Pheme').add(utils.stringToBase58('MEX')),
             phemex: utils.stringToBase58('Phemex')
         }
     }
 
-    for (const permute of g.permutation([base58.converted.btc, base58.converted.eth, base58.converted.xrp])) {
-        let number = bigInt(permute.join('')), bignum = base58.converted.pheme.multiply(number)
+    console.log(base58.converted.btc, base58.converted.eth, base58.converted.xrp, base58.converted.phemex)
+
+    for (const permute of g.permutation([base58.hardCoded.btc, base58.hardCoded.eth, base58.hardCoded.xrp])) {
+        let number = bigInt(permute.join('')), bignum = base58.hardCoded.pheme_mex.multiply(number)
 
         console.log(`${number} ${number.toString().length} ${bignum} ${bignum.toString().length}`)
         console.log(bignum, String(bignum).length)
-        //if (String(bignum).length == 27)
-            //checkPossibilities(bignum)
-    }
-
-    function checkPossibilities(bignum, prime = bigInt(957496696762772407663)) {
-        const possibilites = {
-            inVal: [ bigInt(`${bignum}${prime}`), bigInt(`${prime}${bignum}`), prime.add(bignum), prime.multiply(bignum) ],
-            inHex: [ `${utils.valueToHex(prime)}${utils.valueToHex(bignum)}`, `${utils.valueToHex(bignum)}${utils.valueToHex(prime)}`],
-        }
-
-        possibilites.inVal.forEach(val => { 
-            utils.checkValueAgainstAddress(val)
-            utils.checkValueAgainstAddress(val, true)
-            utils.sha256Encrytp(val.toString().concat(prime))
-            utils.sha256Encrytp(String(prime).concat(val.toString()))
-        });
-
-        possibilites.inHex.forEach(hex => {
-            utils.checkHexAgainstAddress(hex)
-            utils.checkHexAgainstAddress(hex, true)
-        })
+        if (String(bignum).length == 27)
+            utils.checkPossibilities(bignum)
     }
 }
 
