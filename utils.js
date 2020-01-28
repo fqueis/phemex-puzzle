@@ -88,18 +88,23 @@ function hexToValue(hex) {
     return BigInt(`0x${hex}`).toString(10)
 }
 
-async function checkValueAgainstAddress(number, bip32 = false, bounty = { compressed: '1h8BNZkhsPiu6EKazP19WkGxDw3jHf9aT', uncompressed: '1LPmwxe59KD6oEJGYinx7Li1oCSRPCSNDY' }) {
+async function checkValueAgainstAddress(number, bounty = { compressed: '1h8BNZkhsPiu6EKazP19WkGxDw3jHf9aT', uncompressed: '1LPmwxe59KD6oEJGYinx7Li1oCSRPCSNDY' }) {
     const hex = padding(valueToHex(number))
 
     //console.log(`Hex ${hex} Length: ${hex.length}`)
 
-    checkHexAgainstAddress(hex, bip32, bounty)
+    checkHexAgainstAddress(hex, bounty)
 }
 
-async function checkHexAgainstAddress(hex, bip32 = false, bounty = { compressed: '1h8BNZkhsPiu6EKazP19WkGxDw3jHf9aT', uncompressed: '1LPmwxe59KD6oEJGYinx7Li1oCSRPCSNDY' }) {
+async function checkHexAgainstAddress(hex, bounty = { compressed: '1h8BNZkhsPiu6EKazP19WkGxDw3jHf9aT', uncompressed: '1LPmwxe59KD6oEJGYinx7Li1oCSRPCSNDY' }) {
     hex = padding(hex)
 
-    if (bip32) {
+    let keys = generateKeys(hex)
+
+    if (keys.compressed.address == bounty.compressed || keys.uncompressed.address == bounty.uncompressed) {
+        console.log('Found!')
+        console.log(keys)
+    } else {
         let addresses = getFromBIP32(hex)
 
         let addressesFiltered = addresses.filter((v) => v == bounty.compressed || v == bounty.uncompressed)
@@ -108,15 +113,6 @@ async function checkHexAgainstAddress(hex, bip32 = false, bounty = { compressed:
             console.log('Found')
             console.log(addresses)
             return addresses
-        }
-            
-    } else {
-        let keys = generateKeys(hex)
-
-        //console.log(keys)
-        if (keys.compressed.address == bounty.compressed || keys.uncompressed.address == bounty.uncompressed) {
-            console.log('Found!')
-            console.log(keys)
         }
     }
 }
@@ -200,14 +196,12 @@ function checkPossibilities(bignum, prime = bigInt(957496696762772407663n)) {
 
     possibilites.inVal.forEach(val => { 
         checkValueAgainstAddress(val)
-        checkValueAgainstAddress(val, true)
         sha256Encrytp(val.toString().concat(prime))
         sha256Encrytp(String(prime).concat(val.toString()))
     });
 
     possibilites.inHex.forEach(hex => {
         checkHexAgainstAddress(hex)
-        checkHexAgainstAddress(hex, true)
     })
 }
 

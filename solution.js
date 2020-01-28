@@ -86,9 +86,6 @@ async function start() {
             phemex: bigInt(224037443755)
         },
         converted: {
-            blockchain: utils.stringToBase58('BlockChain'),
-            ethereum: utils.stringToBase58('Ethereum'),
-            ripple: utils.stringToBase58('Ripple'),
             btc: utils.stringToBase58('BTC'),
             xrp: utils.stringToBase58('XRP'),
             eth: utils.stringToBase58('ETH'),
@@ -97,20 +94,14 @@ async function start() {
         }
     }
 
-    console.log(String(bigInt(669921875).multiply(bigInt(105154048).multiply(250047000))).length)
-    
+    for (const permute of g.permutation([base58.converted.btc, base58.converted.eth, base58.converted.xrp])) {
+        let number = bigInt(permute.join('')), bignum = base58.converted.pheme.multiply(number)
 
-    //console.log(utils.sha256Encrytp('BTC'))
-
-    //console.log(`${base58.converted.btc}${base58.converted.eth}${base58.converted.xrp} ${base58.converted.pheme}`)
-    /*for (const permute of g.permutation([vIn, btc, xrp, eth])) {
-        let number = bigInt(permute.join('')), bignum = pheme.multiply(number)
-
-        //console.log(`${number} ${number.toString().length} ${bignum} ${bignum.toString().length}`)
-        //console.log(bignum, String(bignum).length)
+        console.log(`${number} ${number.toString().length} ${bignum} ${bignum.toString().length}`)
+        console.log(bignum, String(bignum).length)
         //if (String(bignum).length == 27)
             //checkPossibilities(bignum)
-    } */
+    }
 
     function checkPossibilities(bignum, prime = bigInt(957496696762772407663)) {
         const possibilites = {
