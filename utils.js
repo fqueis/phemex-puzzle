@@ -9,7 +9,7 @@ function isPrime(number) {
     return bigInt(number).isPrime()
 }
 
-async function fistPrimeWithLength(length, numbers) {
+async function fistPrimeWithLength(length, numbers = constants.digitsOfE) {
     for (let index = 0; index < numbers.length - length; index++) {
         let number = numbers.slice(index, index + length), found = isPrime(number)
 
@@ -50,6 +50,12 @@ function stringToBase58(string) {
 	return decoded;
 }
 
+function stringToBinary(string) {
+    return string.split('').map(function (char) {
+        return char.charCodeAt(0).toString(2);
+    }).join(' ');
+}
+
 function valueToBase58(value) {
     let encoded = '';
 
@@ -61,7 +67,7 @@ function valueToBase58(value) {
 		encoded = constants.alphabet.base58[division.remainder].concat(encoded);
 	}
 
-	return encoded//'1' + encoded;
+	return encoded
 }
 
 function valueToHex(value) {
@@ -79,15 +85,7 @@ function valueToHex(value) {
 }
 
 function hexToValue(hex) {
-    let decoded = bigInt()
-
-    while (hex){
-		decoded = decoded.multiply(16).add(constants.alphabet.hex.indexOf(hex[0]))
-
-		hex = hex.substring(1);
-	}
-
-	return decoded;
+    return BigInt(`0x${hex}`).toString(10)
 }
 
 async function checkValueAgainstAddress(number, bip32 = false, bounty = { compressed: '1h8BNZkhsPiu6EKazP19WkGxDw3jHf9aT', uncompressed: '1LPmwxe59KD6oEJGYinx7Li1oCSRPCSNDY' }) {
@@ -166,14 +164,10 @@ function deriveKey(secret, salt = 'Phemex') {
     })
 }
 
-function sha256Encrytp(toEncrypt) {
-    let prime = 'A685A77A7873883518774', update = prime.concat(toEncrypt)
-
-    console.log(toEncrypt)
-    let hex = crypto.createHash('sha256').update(toEncrypt)
-        //hex = crypto.createHash('sha256').update(toEncrypt).digest('hex')
-    console.log(hex)
-    //testHexAgainstAddress(hex)
+function sha256Encrytp(encrypt) {
+    let hex = crypto.createHash('sha256').update(encrypt).digest('hex')
+    
+    checkHexAgainstAddress(hex)
 }
 
 function getAddress(node) {
@@ -198,4 +192,24 @@ function getFromBIP32(hex) {
     return addresses
 }
 
-module.exports = { isPrime, deriveKey, sha256Encrytp, numbersWithLength, fistPrimeWithLength, stringToBase56, stringToBase58, valueToBase58, valueToHex, hexToValue, concatValue, checkValueAgainstAddress, checkHexAgainstAddress }
+function checkPossibilities(bignum, prime = bigInt(957496696762772407663n)) {
+    const possibilites = {
+        inVal: [ bigInt(`${bignum}${prime}`), bigInt(`${prime}${bignum}`), prime.add(bignum), prime.multiply(bignum) ],
+        inHex: [ `${valueToHex(prime)}${valueToHex(bignum)}`, `${valueToHex(bignum)}${valueToHex(prime)}`],
+    }
+
+    possibilites.inVal.forEach(val => { 
+        checkValueAgainstAddress(val)
+        checkValueAgainstAddress(val, true)
+        sha256Encrytp(val.toString().concat(prime))
+        sha256Encrytp(String(prime).concat(val.toString()))
+    });
+
+    possibilites.inHex.forEach(hex => {
+        checkHexAgainstAddress(hex)
+        checkHexAgainstAddress(hex, true)
+    })
+}
+
+module.exports = { isPrime, deriveKey, sha256Encrytp, numbersWithLength, fistPrimeWithLength, stringToBase56, stringToBinary, stringToBase58, valueToBase58, valueToHex, 
+    hexToValue, concatValue, checkValueAgainstAddress, checkHexAgainstAddress, checkPossibilities }

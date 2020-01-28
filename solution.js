@@ -77,24 +77,52 @@ async function start() {
     
     utils.sha256Encrytp(String(phemex.multiply(concated))) */
 
-    const btc = bigInt(102611), xrp = bigInt(302422), eth = bigInt(132616), pheme = bigInt(2240374437)
-
-    for (const permute of g.baseN([btc, xrp, eth])) {
-        let number = bigInt(permute.join('')), bignum = pheme.multiply(number)
-
-        if (String(bignum).length == 27)
-            checkPossibilities(bignum)
+    const base58 = {
+        hardCoded: {
+            btc: BigInt(102611),
+            xrp: BigInt(302422),
+            eth: bigInt(132616),
+            pheme: bigInt(2240374437),
+            phemex: bigInt(224037443755)
+        },
+        converted: {
+            blockchain: utils.stringToBase58('BlockChain'),
+            ethereum: utils.stringToBase58('Ethereum'),
+            ripple: utils.stringToBase58('Ripple'),
+            btc: utils.stringToBase58('BTC'),
+            xrp: utils.stringToBase58('XRP'),
+            eth: utils.stringToBase58('ETH'),
+            pheme: utils.stringToBase58('Pheme'),
+            phemex: utils.stringToBase58('Phemex')
+        }
     }
 
-    function checkPossibilities(bignum) {
+    console.log(String(bigInt(669921875).multiply(bigInt(105154048).multiply(250047000))).length)
+    
+
+    //console.log(utils.sha256Encrytp('BTC'))
+
+    //console.log(`${base58.converted.btc}${base58.converted.eth}${base58.converted.xrp} ${base58.converted.pheme}`)
+    /*for (const permute of g.permutation([vIn, btc, xrp, eth])) {
+        let number = bigInt(permute.join('')), bignum = pheme.multiply(number)
+
+        //console.log(`${number} ${number.toString().length} ${bignum} ${bignum.toString().length}`)
+        //console.log(bignum, String(bignum).length)
+        //if (String(bignum).length == 27)
+            //checkPossibilities(bignum)
+    } */
+
+    function checkPossibilities(bignum, prime = bigInt(957496696762772407663)) {
         const possibilites = {
             inVal: [ bigInt(`${bignum}${prime}`), bigInt(`${prime}${bignum}`), prime.add(bignum), prime.multiply(bignum) ],
-            inHex: [ `${utils.valueToHex(prime)}${utils.valueToHex(bignum)}`, `${utils.valueToHex(bignum)}${utils.valueToHex(prime)}`]
+            inHex: [ `${utils.valueToHex(prime)}${utils.valueToHex(bignum)}`, `${utils.valueToHex(bignum)}${utils.valueToHex(prime)}`],
         }
 
         possibilites.inVal.forEach(val => { 
             utils.checkValueAgainstAddress(val)
             utils.checkValueAgainstAddress(val, true)
+            utils.sha256Encrytp(val.toString().concat(prime))
+            utils.sha256Encrytp(String(prime).concat(val.toString()))
         });
 
         possibilites.inHex.forEach(hex => {
