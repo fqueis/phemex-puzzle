@@ -159,12 +159,6 @@ function concatValue(...number) {
     }
 }
 
-function deriveKey(secret, salt = 'Phemex') {
-    crypto.pbkdf2(secret, salt, 1000, 64, 'sha256', (err, derivedKey) => {
-        return checkHexAgainstAddress(derivedKey.toString('hex'), { compressed: '1CHUUuEGv49ADj6vXRwf6ScCPg2pfDPivd' })
-    })
-}
-
 function sha256Encrytp(encrypt, prime = '957496696762772407663' ) {
     return  checkHexAgainstAddress(crypto.createHash('sha256').update(encrypt.concat(prime)).digest('hex')) ||
             checkHexAgainstAddress(crypto.createHash('sha256').update(prime.concat(encrypt)).digest('hex'))
@@ -221,5 +215,5 @@ function checkPossibilitiesAsHex(possibilites) {
     } 
 }
 
-module.exports = { isPrime, deriveKey, sha256Encrytp, numbersWithLength, fistPrimeWithLength, stringToBase56, stringToBinary, stringToBase58, valueToBase58, valueToHex, 
+module.exports = { isPrime, sha256Encrytp, numbersWithLength, fistPrimeWithLength, stringToBase56, stringToBinary, stringToBase58, valueToBase58, valueToHex, 
     hexToValue, concatValue, checkValueAgainstAddress, checkHexAgainstAddress, checkPossibilities }
