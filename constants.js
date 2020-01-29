@@ -10,4 +10,6 @@ const alphabet = {
     base58: "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 }
 
-module.exports = { digitsOfE, alphabet }
+const words = 'First 21 digit prime found in consecutive digits of e ETH XRP'
+
+module.exports = { digitsOfE, alphabet, words }

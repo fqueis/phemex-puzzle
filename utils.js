@@ -4,6 +4,9 @@ const constants = require('./constants')
 const crypto    = require('crypto')
 const bigInt    = require('big-integer')
 const bitcoin   = require('bitcoinjs-lib')
+const fs        = require('fs')
+
+const keysFile  = fs.createWriteStream(`./${Date.now()}.txt`, { flags: 'a' })
 
 function isPrime(number) {
     return bigInt(number).isPrime()
@@ -88,33 +91,42 @@ function hexToValue(hex) {
     return BigInt(`0x${hex}`).toString(10)
 }
 
-async function checkValueAgainstAddress(number, bounty = { compressed: '1h8BNZkhsPiu6EKazP19WkGxDw3jHf9aT', uncompressed: '1LPmwxe59KD6oEJGYinx7Li1oCSRPCSNDY' }) {
+function checkValueAgainstAddress(number, bounty = { compressed: '1h8BNZkhsPiu6EKazP19WkGxDw3jHf9aT', uncompressed: '1LPmwxe59KD6oEJGYinx7Li1oCSRPCSNDY' }) {
     const hex = padding(valueToHex(number))
 
     //console.log(`Hex ${hex} Length: ${hex.length}`)
 
-    checkHexAgainstAddress(hex, bounty)
+    return checkHexAgainstAddress(hex, bounty)
 }
 
-async function checkHexAgainstAddress(hex, bounty = { compressed: '1h8BNZkhsPiu6EKazP19WkGxDw3jHf9aT', uncompressed: '1LPmwxe59KD6oEJGYinx7Li1oCSRPCSNDY' }) {
+function checkHexAgainstAddress(hex, bounty = { compressed: '1h8BNZkhsPiu6EKazP19WkGxDw3jHf9aT', uncompressed: '1LPmwxe59KD6oEJGYinx7Li1oCSRPCSNDY' }) {
     hex = padding(hex)
 
     let keys = generateKeys(hex)
 
+    keysFile.write(`Compressed: \n\tAddress: ${keys.compressed.address}\n\tPubKey: ${keys.compressed.public}\n\tPrivKey: ${keys.compressed.private}\n`)
+    keysFile.write(`Uncompressed: \n\tAddress: ${keys.uncompressed.address}\n\tPubKey: ${keys.uncompressed.public}\n\tPrivKey: ${keys.uncompressed.private}\n`)
+
+    //console.log(`Compressed: \n\tAddress: ${keys.compressed.address}\n\tPubKey: ${keys.compressed.public}\n\tPrivKey: ${keys.compressed.private}`)
+    //console.log(`Uncompressed: \n\tAddress: ${keys.uncompressed.address}\n\tPubKey: ${keys.uncompressed.public}\n\tPrivKey: ${keys.uncompressed.private}`)
     if (keys.compressed.address == bounty.compressed || keys.uncompressed.address == bounty.uncompressed) {
-        console.log('Found!')
-        console.log(keys)
+        keysFile.write('---------------- FOUND!! ----------------')
+        return true
     } else {
         let addresses = getFromBIP32(hex)
 
+        keysFile.write(`BIP32:\n\tKeys: ${addresses.join(',')}\n`)
+        /*console.log(`BIP32: `)
+        console.log(`\tKeys: ${addresses.join(',')}\n`)*/
         let addressesFiltered = addresses.filter((v) => v == bounty.compressed || v == bounty.uncompressed)
         
         if (addressesFiltered.length > 0) {
-            console.log('Found')
-            console.log(addresses)
-            return addresses
+            keysFile.write('---------------- FOUND!! ----------------')
+            return true
         }
     }
+
+    return false
 }
 
 function generateKeys(hex) {
@@ -154,16 +166,14 @@ function concatValue(...number) {
 }
 
 function deriveKey(secret, salt = 'Phemex') {
-    crypto.pbkdf2(secret, salt, 21, 64, 'sha256', (err, derivedKey) => {
-        if (!err)
-            checkHexAgainstAddress(derivedKey.toString('hex'))
+    crypto.pbkdf2(secret, salt, 1000, 64, 'sha256', (err, derivedKey) => {
+        return checkHexAgainstAddress(derivedKey.toString('hex'), { compressed: '1CHUUuEGv49ADj6vXRwf6ScCPg2pfDPivd' })
     })
 }
 
-function sha256Encrytp(encrypt) {
-    let hex = crypto.createHash('sha256').update(encrypt).digest('hex')
-    
-    checkHexAgainstAddress(hex)
+function sha256Encrytp(encrypt, prime = '957496696762772407663' ) {
+    return  checkHexAgainstAddress(crypto.createHash('sha256').update(encrypt.concat(prime)).digest('hex')) ||
+            checkHexAgainstAddress(crypto.createHash('sha256').update(prime.concat(encrypt)).digest('hex'))
 }
 
 function getAddress(node) {
@@ -183,26 +193,51 @@ function getFromBIP32(hex) {
         addresses.push(address)
     }
 
-    //console.log(hex, addresses)
-
     return addresses
 }
 
 function checkPossibilities(bignum, prime = bigInt(957496696762772407663n)) {
     const possibilites = {
-        inVal: [ bigInt(`${bignum}${prime}`), bigInt(`${prime}${bignum}`), prime.add(bignum), prime.multiply(bignum) ],
-        inHex: [ `${valueToHex(prime)}${valueToHex(bignum)}`, `${valueToHex(bignum)}${valueToHex(prime)}`],
+        asVal: [ bigInt(`${bignum}${prime}`), bigInt(`${prime}${bignum}`), prime.add(bignum), prime.multiply(bignum) ],
+        asHex: [ `${valueToHex(prime)}${valueToHex(bignum)}`, `${valueToHex(bignum)}${valueToHex(prime)}`]
     }
 
-    possibilites.inVal.forEach(val => { 
-        checkValueAgainstAddress(val)
-        sha256Encrytp(val.toString().concat(prime))
-        sha256Encrytp(String(prime).concat(val.toString()))
-    });
+    let found = checkPossibilitiesAsValue(possibilites.asVal)
 
-    possibilites.inHex.forEach(hex => {
-        checkHexAgainstAddress(hex)
-    })
+    if (!found) {
+        found = checkPossibilitiesAsHex(possibilites.asHex)
+        keysFile.write('\n')
+    }
+        
+
+    return found
+}
+
+function checkPossibilitiesAsValue(possibilites) {
+    for (let index = 0; index < possibilites.length; index++) {
+        let possibility = possibilites[index]
+
+        keysFile.write(`Checking combination ${possibility}\n`)
+        //console.log(`Checking combination ${possibility}`, () => {})
+
+        return checkValueAgainstAddress(possibility) || sha256Encrytp(possibility.toString())
+    } 
+}
+
+function checkPossibilitiesAsHex(possibilites) {
+    for (let index = 0; index < possibilites.length; index++) {
+        let possibility = possibilites[index]
+
+        return checkHexAgainstAddress(possibility)
+    } 
+}
+
+function checkPossibilitiesAsText(possibilites) {
+    for (let index = 0; index < possibilites.length; index++) {
+        let possibility = possibilites[index]
+
+        return deriveKey(possibility)
+    } 
 }
 
 module.exports = { isPrime, deriveKey, sha256Encrytp, numbersWithLength, fistPrimeWithLength, stringToBase56, stringToBinary, stringToBase58, valueToBase58, valueToHex, 
