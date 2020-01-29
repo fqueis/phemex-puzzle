@@ -12,21 +12,21 @@ function isPrime(number) {
     return bigInt(number).isPrime()
 }
 
-async function fistPrimeWithLength(length, numbers = constants.digitsOfE) {
+function fistPrimeWithLength(length, numbers = constants.digitsOfE) {
     for (let index = 0; index < numbers.length - length; index++) {
         let number = numbers.slice(index, index + length), found = isPrime(number)
 
-        if (found) return Promise.resolve(bigInt(number))
+        if (found) bigInt(number)
     }
 }
 
-async function numbersWithLength(length, numbers) {
+function numbersWithLength(length, numbers) {
     let numbersArray = []
     
     for (let index = 0; index < numbers.length - length; index++)
         numbersArray.push(numbers.slice(index, index + length))
 
-    return Promise.resolve(numbersArray)
+    return numbersArray
 }
 
 function stringToBase56(string) {
@@ -94,8 +94,6 @@ function hexToValue(hex) {
 function checkValueAgainstAddress(number, bounty = { compressed: '1h8BNZkhsPiu6EKazP19WkGxDw3jHf9aT', uncompressed: '1LPmwxe59KD6oEJGYinx7Li1oCSRPCSNDY' }) {
     const hex = padding(valueToHex(number))
 
-    //console.log(`Hex ${hex} Length: ${hex.length}`)
-
     return checkHexAgainstAddress(hex, bounty)
 }
 
@@ -107,8 +105,6 @@ function checkHexAgainstAddress(hex, bounty = { compressed: '1h8BNZkhsPiu6EKazP1
     keysFile.write(`Compressed: \n\tAddress: ${keys.compressed.address}\n\tPubKey: ${keys.compressed.public}\n\tPrivKey: ${keys.compressed.private}\n`)
     keysFile.write(`Uncompressed: \n\tAddress: ${keys.uncompressed.address}\n\tPubKey: ${keys.uncompressed.public}\n\tPrivKey: ${keys.uncompressed.private}\n`)
 
-    //console.log(`Compressed: \n\tAddress: ${keys.compressed.address}\n\tPubKey: ${keys.compressed.public}\n\tPrivKey: ${keys.compressed.private}`)
-    //console.log(`Uncompressed: \n\tAddress: ${keys.uncompressed.address}\n\tPubKey: ${keys.uncompressed.public}\n\tPrivKey: ${keys.uncompressed.private}`)
     if (keys.compressed.address == bounty.compressed || keys.uncompressed.address == bounty.uncompressed) {
         keysFile.write('---------------- FOUND!! ----------------')
         return true
@@ -116,8 +112,6 @@ function checkHexAgainstAddress(hex, bounty = { compressed: '1h8BNZkhsPiu6EKazP1
         let addresses = getFromBIP32(hex)
 
         keysFile.write(`BIP32:\n\tKeys: ${addresses.join(',')}\n`)
-        /*console.log(`BIP32: `)
-        console.log(`\tKeys: ${addresses.join(',')}\n`)*/
         let addressesFiltered = addresses.filter((v) => v == bounty.compressed || v == bounty.uncompressed)
         
         if (addressesFiltered.length > 0) {
@@ -176,10 +170,6 @@ function sha256Encrytp(encrypt, prime = '957496696762772407663' ) {
             checkHexAgainstAddress(crypto.createHash('sha256').update(prime.concat(encrypt)).digest('hex'))
 }
 
-function getAddress(node) {
-    return bitcoin.payments.p2pkh({ pubkey: node.publicKey });
-}
-
 function getFromBIP32(hex) {
     const root = bitcoin.bip32.fromSeed(Buffer.from(hex, 'hex'))
 
@@ -188,7 +178,7 @@ function getFromBIP32(hex) {
         const path = `m/0'/0'/${index}'`
         const child = root.derivePath(path)
 
-        const { address } = getAddress(child)
+        const { address } = bitcoin.payments.p2pkh({ pubkey: child.publicKey });
 
         addresses.push(address)
     }
@@ -218,7 +208,6 @@ function checkPossibilitiesAsValue(possibilites) {
         let possibility = possibilites[index]
 
         keysFile.write(`Checking combination ${possibility}\n`)
-        //console.log(`Checking combination ${possibility}`, () => {})
 
         return checkValueAgainstAddress(possibility) || sha256Encrytp(possibility.toString())
     } 
@@ -229,14 +218,6 @@ function checkPossibilitiesAsHex(possibilites) {
         let possibility = possibilites[index]
 
         return checkHexAgainstAddress(possibility)
-    } 
-}
-
-function checkPossibilitiesAsText(possibilites) {
-    for (let index = 0; index < possibilites.length; index++) {
-        let possibility = possibilites[index]
-
-        return deriveKey(possibility)
     } 
 }
 
