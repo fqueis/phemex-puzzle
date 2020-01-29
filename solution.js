@@ -79,12 +79,14 @@ async function start() {
 
     const base58 = {
         hardCoded: {
-            btc: BigInt(102611),
-            xrp: BigInt(302422),
+            btc: bigInt(102611),
+            xrp: bigInt(302422),
             eth: bigInt(132616),
             pheme: bigInt(2240374437),
             pheme_mex: bigInt(2240374437).add(201330),
-            phemex: bigInt(224037443755)
+            phemex: bigInt(224037443755),
+            found: bigInt(3846524536),
+            in: bigInt(4145)
         },
         converted: {
             btc: utils.stringToBase58('BTC'),
@@ -96,7 +98,11 @@ async function start() {
         }
     }
 
-    console.log(base58.converted.btc, base58.converted.eth, base58.converted.xrp, base58.converted.phemex)
+    let frase = `${base58.hardCoded.btc.pow(2)}${base58.hardCoded.found}${base58.hardCoded.in}`
+
+    console.log(base58.converted.btc, frase, String(frase).length)
+
+    /*console.log(base58.converted.btc, base58.converted.eth, base58.converted.xrp, base58.converted.phemex)
 
     for (const permute of g.permutation([base58.hardCoded.btc, base58.hardCoded.eth, base58.hardCoded.xrp])) {
         let number = bigInt(permute.join('')), bignum = base58.hardCoded.pheme_mex.multiply(number)
@@ -105,7 +111,7 @@ async function start() {
         console.log(bignum, String(bignum).length)
         if (String(bignum).length == 27)
             utils.checkPossibilities(bignum)
-    }
+    } */
 }
 
 start().catch((err) => console.log(err))
