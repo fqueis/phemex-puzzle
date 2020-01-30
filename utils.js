@@ -6,7 +6,7 @@ const bigInt    = require('big-integer')
 const bitcoin   = require('bitcoinjs-lib')
 const fs        = require('fs')
 
-const keysFile  = fs.createWriteStream(`./${Date.now()}.txt`, { flags: 'a' })
+//const keysFile  = fs.createWriteStream(`./${Date.now()}.txt`, { flags: 'a' })
 
 function isPrime(number) {
     return bigInt(number).isPrime()
@@ -51,6 +51,12 @@ function stringToBase58(string) {
 	}
 
 	return decoded;
+}
+
+function reversedStringToBase58(string) {
+    string = string.split('').reverse().join('')
+
+    return stringToBase58(string)
 }
 
 function stringToBinary(string) {
@@ -159,9 +165,12 @@ function concatValue(...number) {
     }
 }
 
-function sha256Encrytp(encrypt, prime = '957496696762772407663' ) {
-    return  checkHexAgainstAddress(crypto.createHash('sha256').update(encrypt.concat(prime)).digest('hex')) ||
-            checkHexAgainstAddress(crypto.createHash('sha256').update(prime.concat(encrypt)).digest('hex'))
+function hash256(encrypt ) {
+    return checkHexAgainstAddress(crypto.createHash('sha256').update(encrypt).digest('hex'))
+}
+
+function doubleHash256(toHash) {
+    return checkHexAgainstAddress(crypto.createHash('sha256').update(crypto.createHash('sha256').update(toHash).digest()).digest('hex'))
 }
 
 function getFromBIP32(hex) {
@@ -197,13 +206,15 @@ function checkPossibilities(bignum, prime = bigInt(957496696762772407663n)) {
     return found
 }
 
+console.log(checkPossibilitiesAsValue([bigInt(1515125), bigInt(15251251)]))
+
 function checkPossibilitiesAsValue(possibilites) {
     for (let index = 0; index < possibilites.length; index++) {
         let possibility = possibilites[index]
 
         keysFile.write(`Checking combination ${possibility}\n`)
 
-        return checkValueAgainstAddress(possibility) || sha256Encrytp(possibility.toString())
+        return checkValueAgainstAddress(possibility) || hash256(possibility.toString()) || doubleHash256(possibility.toString())
     } 
 }
 
@@ -215,5 +226,5 @@ function checkPossibilitiesAsHex(possibilites) {
     } 
 }
 
-module.exports = { isPrime, sha256Encrytp, numbersWithLength, fistPrimeWithLength, stringToBase56, stringToBinary, stringToBase58, valueToBase58, valueToHex, 
+module.exports = { isPrime, hash256, numbersWithLength, fistPrimeWithLength, stringToBase56, stringToBinary, reversedStringToBase58, stringToBase58, valueToBase58, valueToHex, 
     hexToValue, concatValue, checkValueAgainstAddress, checkHexAgainstAddress, checkPossibilities }

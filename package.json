@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "base58": "^2.0.1",
     "big-integer": "^1.6.48",
     "bip44-constants": "^8.0.5",
     "bitcoinjs-lib": "^5.1.7",
