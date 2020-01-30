@@ -191,8 +191,16 @@ function getFromBIP32(hex) {
 
 function checkPossibilities(bignum, prime = bigInt(957496696762772407663n)) {
     const possibilites = {
-        asVal: [ bigInt(`${bignum}${prime}`), bigInt(`${prime}${bignum}`), prime.add(bignum), prime.multiply(bignum) ],
-        asHex: [ `${valueToHex(prime)}${valueToHex(bignum)}`, `${valueToHex(bignum)}${valueToHex(prime)}`]
+        asVal: [ 
+            bigInt(`${bignum}${prime}`), 
+            bigInt(`${prime}${bignum}`), 
+            prime.add(bignum), 
+            prime.multiply(bignum), 
+            bigInt(`${prime}${bignum}${bignum}`), 
+            `${prime}${bignum.multiply(bignum)}`
+            `${bignum.multiply(bignum)}${prime}`
+        ],
+        asHex: [ `${valueToHex(prime)}${valueToHex(bignum)}`, `${valueToHex(bignum)}${valueToHex(prime)}` ]
     }
 
     let found = checkPossibilitiesAsValue(possibilites.asVal)
@@ -205,8 +213,6 @@ function checkPossibilities(bignum, prime = bigInt(957496696762772407663n)) {
 
     return found
 }
-
-console.log(checkPossibilitiesAsValue([bigInt(1515125), bigInt(15251251)]))
 
 function checkPossibilitiesAsValue(possibilites) {
     for (let index = 0; index < possibilites.length; index++) {
