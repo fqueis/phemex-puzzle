@@ -4,6 +4,7 @@ const constants = require('./constants')
 const crypto    = require('crypto')
 const bigInt    = require('big-integer')
 const bitcoin   = require('bitcoinjs-lib')
+const primeFac  = require('prime-factors')
 const fs        = require('fs')
 
 //const keysFile  = fs.createWriteStream(`./${Date.now()}.txt`, { flags: 'a' })
@@ -16,8 +17,79 @@ function fistPrimeWithLength(length, numbers = constants.digitsOfE) {
     for (let index = 0; index < numbers.length - length; index++) {
         let number = numbers.slice(index, index + length), found = isPrime(number)
 
-        if (found) bigInt(number)
+        if (found) return bigInt(number)
     }
+}
+
+function primeFactorsOf(prime = bigInt(957496696762772407663n)) {
+    let primeFactors = [], divisor = bigInt(2)
+
+    while (prime.mod(divisor).compareTo(bigInt.zero) == 0) {
+        primeFactors.push(divisor);
+        prime = prime.divide(divisor)
+    }
+
+    let sqrt = Math.sqrt(prime)
+
+    for (let index = 3; index <= sqrt; index++){
+        while (prime.mod(index) === 0) {
+            primeFactors.push(index)
+            prime = prime.divide(index)
+        }
+    }
+
+    if (prime.compareTo(divisor) >= 1)
+        primeFactors.push(prime)
+
+    return primeFactors.filter((element, position) => primeFactors.indexOf(element) == position)
+}
+
+// TODO: FIX!
+async function primitiveRootOf(prime = bigInt(957496696762772407663n)) {
+    let phi = prime.subtract(bigInt.one)
+
+    const primeFactors = await primeFactorsOf(phi)
+    
+    for (let index = bigInt(2); index <= phi; index = index.add(bigInt.one)) {
+        let flag = false
+
+        console.log(primeFactors)
+
+        for (let r = 2; r < primeFactors.length; r++) {
+            const primeFactor = primeFactors[r];
+
+            let pResult = await power(bigInt(r), phi.divide(primeFactor), prime)
+
+            if (pResult.compareTo(bigInt.one) == 0) {
+                flag = true
+                break
+            }
+        }
+    }
+
+    return bigInt.minusOne
+}
+
+async function power(x, y, p) {
+    let result = bigInt.one
+
+    x = x.mod(p)
+
+    while (y.compareTo(bigInt.zero) == 1) {
+        if (y.mod(2) == 1)
+            result = result.multiply(x).mod(p)
+
+        y = y.divide(bigInt(2))
+        x = (x.multiply(x)).mod(p)
+    }
+
+    return result
+}
+
+function diffieHellman(prime, a, b, g = bigInt(5)) {
+    let me = g.pow(a).mod(prime), phemex = g.pow(b).mod(prime)
+
+    return phemex.pow(a).mod(prime)
 }
 
 function numbersWithLength(length, numbers) {
@@ -197,8 +269,8 @@ function checkPossibilities(bignum, prime = bigInt(957496696762772407663n)) {
             prime.add(bignum), 
             prime.multiply(bignum), 
             bigInt(`${prime}${bignum}${bignum}`), 
-            `${prime}${bignum.multiply(bignum)}`
-            `${bignum.multiply(bignum)}${prime}`
+            bigInt(`${prime}${bignum.multiply(bignum)}`),
+            bigInt(`${bignum.multiply(bignum)}${prime}`)
         ],
         asHex: [ `${valueToHex(prime)}${valueToHex(bignum)}`, `${valueToHex(bignum)}${valueToHex(prime)}` ]
     }

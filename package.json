@@ -11,10 +11,12 @@
   "dependencies": {
     "base58": "^2.0.1",
     "big-integer": "^1.6.48",
+    "big-number": "^2.0.0",
     "bip44-constants": "^8.0.5",
     "bitcoinjs-lib": "^5.1.7",
     "crypto": "^1.0.1",
     "generatorics": "^1.1.0",
-    "line-reader": "^0.4.0"
+    "line-reader": "^0.4.0",
+    "prime-factors": "^0.1.0"
   }
 }
