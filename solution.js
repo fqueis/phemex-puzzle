@@ -7,19 +7,11 @@ const bs58    = require('base58')
 const g         = require('generatorics')
 
 function start() {
-    const btc = utils.reversedStringToBase58('BTC'), eth = utils.reversedStringToBase58('ETH'), xrp = utils.reversedStringToBase58('XRP'), phemex = utils.stringToBase58('Phemex')
+    const btc   = utils.stringToBase58('BTC'), eth = utils.reversedStringToBase58('ETH'), 
+        xrp = utils.stringToBase58('XRP'), phemex = utils.reversedStringToBase58('Phemex'), prime = utils.fistPrimeWithLength(21)
 
-    console.log(`${btc} ${btc.pow(2)} ${btc.multiply(2)}`)
-    
-
-    /*for (const permute of g.permutation([])) {
-        let number = bigInt(permute.join(''))
-
-        console.log(`${number} ${number.toString().length} ${bignum} ${bignum.toString().length}`)
-        console.log(bignum, String(bignum).length)
-        if (String(bignum).length == 27)
-            utils.checkPossibilities(bignum)
-    }*/
+    console.log(btc, eth, xrp, btc, prime, phemex)
+    console.log(btc.multiply(prime).add(eth).add(xrp))
 }
 
 start()
