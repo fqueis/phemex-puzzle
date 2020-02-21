@@ -3,3 +3,19 @@ https://iancoleman.io/bitcoin-key-compression/
 https://repl.it/repls/TremendousOilySdk
 https://www.rapidtables.com/convert/number/decimal-to-hex.html
 https://www.charactercountonline.com/
+
+base58_decode('ETH') = b0 c8. If you take that number as big endian, that means it's just like regular decimal numbers, i.e. 
+the leftmost byte is the highest one.
+So converting to decimal gives 
+0xb0 * 256 + 0xc8 = (11*16) * 256 + (12*16+8) = 45256
+
+Little endian is just the other way around, you would "start low and get higher":
+
+0xb0 + 0xc8 * 256 =  (11*16) + (12*16+8) * 256 = 51376
+
+In essence: to convert a multiple-byte word between big and little endian, just reverse the bytes
+
+Phemex 	= 03781a18d1
+ETH 	= b0c8
+BTC 	= 8957
+XRP 	= 018fbe

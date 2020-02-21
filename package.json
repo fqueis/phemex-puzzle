@@ -14,6 +14,7 @@
     "big-number": "^2.0.0",
     "bip44-constants": "^8.0.5",
     "bitcoinjs-lib": "^5.1.7",
+    "bs58": "^4.0.1",
     "crypto": "^1.0.1",
     "generatorics": "^1.1.0",
     "line-reader": "^0.4.0",
