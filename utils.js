@@ -4,10 +4,9 @@ const constants = require('./constants')
 const crypto    = require('crypto')
 const bigInt    = require('big-integer')
 const bitcoin   = require('bitcoinjs-lib')
-const primeFac  = require('prime-factors')
 const fs        = require('fs')
 
-//const keysFile  = fs.createWriteStream(`./${Date.now()}.txt`, { flags: 'a' })
+const keysFile  = fs.createWriteStream(`./${Date.now()}.txt`, { flags: 'a' })
 
 function isPrime(number) {
     return bigInt(number).isPrime()
@@ -113,11 +112,11 @@ function stringToBase56(string) {
 	return decoded;
 }
 
-function stringToBase58(string) {
-	let decoded = bigInt();
+function stringToBase58(string, alphabet = constants.alphabet.base58.btc) {
+    let decoded = bigInt(0);
 
 	while (string){
-		decoded = decoded.multiply(58).add(constants.alphabet.base58.indexOf(string[0]))
+        decoded = decoded.multiply(58).add(alphabet.indexOf(string[0]))
 
 		string = string.substring(1);
 	}
@@ -155,18 +154,39 @@ function valueToHex(value) {
     let hex = '';
 
 	while (value.compareTo(0)){
-		let division = value.divmod(16);
-		
-		value = division.quotient
-
-		hex = constants.alphabet.hex[division.remainder].concat(hex);
+        let division = value.divmod(16);
+        
+        value = division.quotient
+        
+        hex = constants.alphabet.hex[division.remainder].concat(hex);
     }
+
+    if (hex.length < 10)
+        hex = '0'.concat(hex)
 
 	return hex.toUpperCase()
 }
 
 function hexToValue(hex) {
     return BigInt(`0x${hex}`).toString(10)
+}
+
+function toLittleEndian(string) {
+    let len = string.length, littleEndianString = ""
+
+    for(let i = 0; i < len/2; i++)
+        littleEndianString += string.substring((len-((i+1)*2)),(len-(i*2)))
+
+    return littleEndianString
+}
+
+function toBigEndian(string) {
+    let len = string.length, bigEndianHexString = "";
+
+    for(let i = 0; i < len/2; i++)
+        bigEndianHexString += string.substring((len-(i*2)), (len-((i+1)*2)))
+
+    return parseInt(bigEndianHexString)
 }
 
 function checkValueAgainstAddress(number, bounty = { compressed: '1h8BNZkhsPiu6EKazP19WkGxDw3jHf9aT', uncompressed: '1LPmwxe59KD6oEJGYinx7Li1oCSRPCSNDY' }) {
@@ -304,5 +324,7 @@ function checkPossibilitiesAsHex(possibilites) {
     } 
 }
 
-module.exports = { isPrime, hash256, numbersWithLength, fistPrimeWithLength, stringToBase56, stringToBinary, reversedStringToBase58, stringToBase58, valueToBase58, valueToHex, 
+module.exports = { 
+    isPrime, hash256, numbersWithLength, fistPrimeWithLength, stringToBase56, stringToBinary, diffieHellman,
+    reversedStringToBase58, stringToBase58, valueToBase58, valueToHex, toLittleEndian, toBigEndian,
     hexToValue, concatValue, checkValueAgainstAddress, checkHexAgainstAddress, checkPossibilities }

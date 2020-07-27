@@ -1,0 +1,9 @@
+Compressed: 
+	Address: 1h8BNZkhsPiu6EKazP19WkGxDw3jHf9aT
+	PubKey: 02b4a72e4aaa69ba04b80c6891df01f50d191a65eccc61e4e9862d1e421ce815b3
+	PrivKey: KwDiBf89QgGfm2CrqioD77Q1g7urAhFcGUyUCQP3GdGAwCQRszmY
+Uncompressed: 
+	Address: 1LPmwxe59KD6oEJGYinx7Li1oCSRPCSNDY
+	PubKey: 04b4a72e4aaa69ba04b80c6891df01f50d191a65eccc61e4e9862d1e421ce815b3ab901d841b04677e00d5b314722a8e2d1ca14f13937a8d7e21a613365ef4f250
+	PrivKey: 5HpHagT65Ta1AyThkDBvVaAkCajnaTnuPzYNZwgtGKdyB6AQznZ
+---------------- FOUND!! ----------------

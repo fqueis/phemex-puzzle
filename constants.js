@@ -7,7 +7,10 @@ const digitsOfE = '2718281828459045235360287471352662497757247093699959574966967
 const alphabet = {
     hex: "0123456789ABCDEF",
     base56: "23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz",
-    base58: "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+    base58: {
+        "btc": "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz",
+        "xrp": "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz"
+    }
 }
 
 const words = 'First 21 digit prime found in consecutive digits of e ETH XRP Phemex BTC'
